@@ -3,12 +3,15 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
+import Game.GamePanel;
+
 public class Window extends JFrame {
 
 	private int windowWidth;
 	private int windowHeight;
 	private Menu menu = new Menu();
 	private Logo logo = new Logo();
+	private GamePanel gamePanel;
 	private double screenWidth;
 	private double screenHeight;
 	private long startTime;
@@ -53,17 +56,17 @@ public class Window extends JFrame {
 	
 		spendTime = System.currentTimeMillis() - startTime;
 		
-		if (spendTime < 4000)
+		if (spendTime < 1000)
 		{
 			try {
-				Thread.sleep(4000 - spendTime);
+				Thread.sleep(1000 - spendTime);
 			} catch (InterruptedException e) {
 				
 				e.printStackTrace();
 			}
 		}
 		logo.stop();
-		
+		this.remove(logo);
 		this.add(menu);
 		menu.start();
 		
@@ -79,9 +82,14 @@ public class Window extends JFrame {
 				e.printStackTrace();
 			}
 		}
+	
+		this.remove(menu);
 		
-		this.add(logo);
-		logo.start();
+		this.gamePanel = new GamePanel(menu.getWidth(), menu.getHeight());
+		this.add(gamePanel);
+		
+		gamePanel.start();
+		this.pack();
 		
 	}
 	

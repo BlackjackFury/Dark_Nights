@@ -73,6 +73,8 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 	private int FPS;
 	private int FPS_Array[] = new int[30];
 	
+	private FileWorker file = new FileWorker();
+	
 	public  Menu()
 	{
 		this.addMouseListener(this);
@@ -109,9 +111,10 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 	
 	public void init()
 	{
+		file.parseFile();
 		createScenes();
-		
 		initFPS();
+		
 	}
 	
 	public void start()
@@ -143,7 +146,7 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 			label = ImageIO.read(new File("./textures/label.png"));
 			label_2 = ImageIO.read(new File("./textures/label_2.png"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -183,21 +186,17 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 
 			
 		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-		
-			
-		
+
 			e.printStackTrace();
 			
 		}	
 		vc = (FloatControl) gameSound.getControl(FloatControl.Type.MASTER_GAIN);
-		vc.setValue((vc.getMaximum() - vc.getMinimum())*(Settings.MUSIC_VOLUME/100) + vc.getMinimum());	
+		vc.setValue((vc.getMaximum() - vc.getMinimum())*(Settings.settings[0]/100) + vc.getMinimum());	
 		buttonVc = (FloatControl) buttonSound.getControl(FloatControl.Type.MASTER_GAIN);
-		buttonVc.setValue((buttonVc.getMaximum() - buttonVc.getMinimum())*(Settings.BUTTON_VOLUME/100) + buttonVc.getMinimum());	
+		buttonVc.setValue((buttonVc.getMaximum() - buttonVc.getMinimum())*(Settings.settings[1]/100) + buttonVc.getMinimum());	
 		
 		gameSound.start(); 
-		
-	
-	
+
 	}
 	
 	public void setSliders()
@@ -338,7 +337,7 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 		{
 			//System.out.println(this.getHeight()/(float)height);
 			for (int i = 1; i < scenes.length; i ++)
-			{
+			{	System.out.println(this.getWidth()/(float)width);
 				scenes[i].updateColliders(this.getWidth()/(float)width, this.getHeight()/(float)height);
 			}
 			width = this.getWidth();
@@ -383,10 +382,11 @@ public  class Menu extends JPanel implements Runnable, MouseListener, KeyListene
 			
 			if (tick == 30)
 			{
+				sizeCheck();
 				tick = 0;		
 			}
 			
-			sizeCheck();
+			
 			if (!actions.isActive())
 			{
 				isRunning = false;
