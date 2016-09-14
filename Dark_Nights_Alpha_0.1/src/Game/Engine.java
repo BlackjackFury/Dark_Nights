@@ -109,28 +109,153 @@ public class Engine implements Runnable
 		vector_y = move_to_y  - height/2;
 		
 		distance = (int) Math.sqrt(Math.pow(vector_x, 2) + Math.pow(vector_y, 2));
+		if (distance < 3 )
+		{
+			distance = 0;
+		}
+	}
+	
+	private void tileFounder(int x, int y)
+	{
+		int x0, y0;
 		
+		
+		double dist0;
+		
+		double dist[] = new double[8];
+		
+		x0 = (x + 32)/64;
+		y0 = (y)/16;
+		
+		
+		if (y0 % 2 == 0)
+		{
+			dist0 =  getDistance(x % 32, y % 16);	
+			
+			dist[0] = getDistance(x - (x0*64 - 32), y- (y0*16 + 16));
+			dist[1] = getDistance(x - (x0*64 + 32), y-(y0*16 + 16));
+			dist[2] = getDistance(x - (x0*64 + 32), y-(y0*16 - 16));
+			dist[3] = getDistance(x - (x0*64 - 32), y-(y0*16 - 16));
+			
+			dist[4] = getDistance(x - (x0*64 - 64), y-(y0*16));
+			dist[5] = getDistance(x - (x0*64), y-( y0*16 + 32));
+			dist[6] = getDistance(x - (x0*64 - 64), y-(y0*16));
+		//	dist[7] = getDistance(x - (x0*64), y-(y0*16 - 32));
+		}
+		else 
+		{
+			dist0 =  getDistance(x - (x0*64 + 32), y-(y0*16));	
+		
+			dist[0] = getDistance(x - (x0*64 ), y- (y0*16 + 16));
+			dist[1] = getDistance(x - (x0*64 +64), y-(y0*16 + 16));
+			dist[2] = getDistance(x - (x0*64 +64), y-(y0*16 - 16));
+			dist[3] = getDistance(x - (x0*64 ), y- (y0*16 - 16));
+			
+			dist[4] = getDistance(x - (x0*64 - 32), y-(y0*16));
+			dist[5] = getDistance(x - (x0*64 + 32), y-( y0*16 + 32));
+			dist[6] = getDistance(x - (x0*64 - 32), y-(y0*16));
+		//	dist[7] = getDistance(x - (x0*64 + 32), y-(y0*16 - 32));
+		}
+		
+		GamePanel.console.addField("D :" + dist0, 10	);
+		
+		for (int i = 0; i < 7; i ++)
+			GamePanel.console.addField("D :" + dist[i], 11+i);
+		
+		
+		double buff = dist[0];
+		int index = 0;
+		for (int i = 1; i < 7; i ++)
+		{
+			if (buff > dist[i])
+			{
+				buff = dist[i];
+				index = i;
+			}
+			
+		}
+		
+		
+		
+		if(buff < dist0)
+		{
+			if (y0 % 2 == 0)
+			{
+					switch  (index) 
+					{
+						case 0 : x0--; y0++; break;
+						case 1 :  y0++; break;
+						case 2 :  y0--; break;
+						case 3 : x0--; y0--; break;
+						case 4 : x0--; break;
+						case 5 : y0 = y0 + 2; break;
+						case 6 : x0++; break;
+				//		case 7 : y0 = y0 - 2; break;
+					}
+				//	System.out.println("x " + index);
+			}
+			else
+			{
+				switch  (index) 
+				{
+					case 0 :  y0++; break;
+					case 1 : x0++; y0++; break;
+					case 2 : x0++; y0--; break;
+					case 3 : x0--; y0--; break;
+					case 4 : x0--; break;
+					case 5 : y0 = y0 + 2; break;
+					case 6 : x0++; break;
+					case 7 : y0 = y0 - 2; break;
+				}
+				
+			//	System.out.println(index);
+			}
+			
+		}
+		
+		GamePanel.console.addField("X :" + x0, 2);
+		GamePanel.console.addField("Y :" + y0, 3);
+	}
+	
+	private double getDistance(int x, int y)
+	{
+		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+	}
+	
+	public double getPlayerRot()
+	{
+		return player.getRot();
+	}
+	
+	public boolean isPlayerMoving()
+	{
+		return player.isMoving();
 	}
 	
 	public void move()
 	{
-		
-		
-		
+			
 		int speed = 3;
 		
 		//System.out.println(distance);
+		
 		if ((distance > speed || distance < -1*speed))
 		{
+			player.setMoving(true);
 			cos = vector_x/Math.sqrt(Math.pow(vector_x,2) + Math.pow(vector_y,2));
 			sin = Math.sqrt(1 - Math.pow(cos, 2));
 		
 			if (vector_y < 0)
 			{
 				sin = -1*sin;
+				player.setRot(Math.acos(-1*cos) + Math.PI);
+			}
+			else
+			{
+				player.setRot(Math.acos(cos));
 			}
 			
-		//	System.out.println(Math.pow(cos*speed,2) + Math.pow(sin*speed,2));
+			
 			real_x = real_x + cos*speed;
 			real_y = real_y + sin*speed;
 			
@@ -140,17 +265,22 @@ public class Engine implements Runnable
 		}
 		else
 		{
-			
+			player.setMoving(true);
 			real_x = real_x + cos*distance;
 			real_y = real_y + sin*distance;
 			
 			player.setX((real_x + cos*distance));
 			player.setY((real_y + sin*distance));
 			distance =  0;
+			player.setMoving(false);
 		}
+		
+		
 		
 	//	GamePanel.console.addField("Distance " + String.valueOf(distance),1);
 	}
+	
+	
 
 	@Override
 	public void run()
@@ -188,22 +318,15 @@ public class Engine implements Runnable
 					int yShift = (player.getY()) % 16;
 					int xShift = player.getX()  % 32; 
 					
-					GamePanel.console.addField("xshift " + String.valueOf(xShift), 9);
-					GamePanel.console.addField("yshift " + String.valueOf(yShift), 10);
 					
 					
 					
-					if(Math.abs(xShift) + 2*Math.abs(yShift) < 64)	
-					{	
-						GamePanel.console.addField("X: " + ((player.getX() )/64 ), 2);				
-						GamePanel.console.addField("Y: " + ((player.getY() )/16), 3);
-					}
-					else 
-					{
-						GamePanel.console.addField("X: " + ((player.getX() )/64 ), 2);				
-						GamePanel.console.addField("Y: " + ((player.getY() )/16  ), 3);
-					}
 					
+					tileFounder(player.getX(), player.getY());
+					
+					
+				//	System.out.print(clay.CoordToTile(player.getX(), player.getY())[0]+ "x");
+				//	System.out.println(clay.CoordToTile(player.getX(), player.getY())[1]);
 					
 					
 					GamePanel.console.addField("X: " + player.getX(), 4);

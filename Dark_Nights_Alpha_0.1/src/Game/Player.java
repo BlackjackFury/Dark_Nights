@@ -8,6 +8,8 @@ public class Player
 	 */
 	
 	private double x, y;
+	private double rot;
+	private boolean isMoving;
 	public Player(int x, int y)
 	{
 		this.x = x;
@@ -43,5 +45,25 @@ public class Player
 	public void setY(double y)
 	{
 		this.y = y;
+	}
+	
+	public double getRot()
+	{
+		return rot;
+	}
+	
+	public boolean isMoving()
+	{
+		return isMoving;
+	}
+	
+	public void setMoving(boolean isMoving)
+	{
+		this.isMoving = isMoving;
+	}
+	
+	public void setRot(double rot)
+	{
+		this.rot = rot;
 	}
 }

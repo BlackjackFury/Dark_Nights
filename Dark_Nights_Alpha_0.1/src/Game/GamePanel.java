@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 	private Engine engine ;
 	private BufferedImage grass;
 	private BufferedImage water;
+	private BufferedImage character;
 	static Console console;
 	
 	private long startTime;
@@ -36,6 +37,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 	private Tile[][] tile;
 	private int shift;
 	private int x0 = 0;
+	private int frame;
 	
 	public  GamePanel(int width, int height)
 	{
@@ -60,6 +62,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 		try {
 			grass = ImageIO.read(new File("./textures/grass.png"));
 			water = ImageIO.read(new File("./textures/water.png"));
+			character = ImageIO.read(new File("./textures/character.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -132,8 +135,50 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 	
 	private void drawPlayer(Graphics gBuffer)
 	{
+		BufferedImage buff = character.getSubimage(0, 69*2, 64, 69);
+		
 		gBuffer.setColor(Color.red);
 		gBuffer.drawOval(rWidth/2 , rHeight/2, 4, 4);
+		
+		if (!engine.isPlayerMoving())
+		{
+			frame  = 0;
+		}
+			else
+			{
+				if (tick % 5 == 0)
+				{
+					frame++;
+				}
+				if (frame == 8)
+				{
+					frame = 1;
+				}
+				
+			}
+		
+		if (engine.getPlayerRot() < (Math.PI + Math.PI/4) && engine.getPlayerRot() > (Math.PI - Math.PI/4) )
+		{
+			 buff = character.getSubimage(64*frame, 69, 64, 69);
+		}
+			else
+				if(engine.getPlayerRot() < (3*Math.PI/2 + Math.PI/4) && engine.getPlayerRot() > (3*Math.PI/2 - Math.PI/4))
+				{
+					buff = character.getSubimage(64*frame, 0, 64, 69);
+				}
+				else
+					if (engine.getPlayerRot() < ( Math.PI/4) || engine.getPlayerRot() > (2*Math.PI - Math.PI/4))
+					{
+						buff = character.getSubimage(64*frame, 190, 64, 66);
+					}
+					else
+				{
+					buff = character.getSubimage(64*frame, 69*2, 64, 69);
+				}
+				
+			gBuffer.drawImage(buff,rWidth/2 - buff.getWidth()/2, rHeight/2 - buff.getHeight() + 20, 
+				buff.getWidth(), buff.getHeight(), null);
+		
 	}
 	
 	
@@ -240,7 +285,9 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 		int moveX = engine.getMoveX();
 		int moveY = engine.getMoveY();
 	
-		
+		int offsetX, offsetY;
+		offsetX = 2;
+		offsetY = 2;
 		
 		BufferedImage imageDraw = null;
 		
@@ -305,7 +352,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 					
 					//thread = new RenderThread(gBuffer,  rWidth, rHeight,  x0,  moveX,  moveY, tile, grass,  water);
 				//	new Thread(thread).start();
-					gBuffer.drawImage(imageDraw, i*64  + x0 - moveX + 26 - 32, j*16 - moveY + 8 - 16, null);
+					gBuffer.drawImage(imageDraw, i*64  + x0 - moveX + 26 - 32 , j*16 - moveY + 8 - 16 , null);
 				//	gBuffer.setColor(Color.red);
 					
 				//	gBuffer.drawString(String.valueOf(i+2) + "," + String.valueOf(j+2), i*64  - x0 - moveX -
@@ -314,7 +361,7 @@ public class GamePanel extends JPanel implements Runnable, MouseListener, KeyLis
 				}
 				else 
 				{
-					gBuffer.drawImage(imageDraw, i*64 + 32 - x0 - moveX + 26 -32 , j*16 - moveY  + 8 - 16, null);
+					gBuffer.drawImage(imageDraw, i*64 + 32 - x0 - moveX + 26 -32  , j*16 - moveY  + 8 - 16 , null);
 				
 				//	gBuffer.setColor(Color.red);
 					
