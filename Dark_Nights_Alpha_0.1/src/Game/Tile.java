@@ -24,4 +24,8 @@ public class Tile {
 	{
 		return level;
 	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
 }

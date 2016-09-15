@@ -22,12 +22,15 @@ public class Engine implements Runnable
 	private Tile[][] buff;
 	private int shiftX, shiftY, shift;
 	private Player player;
+	private boolean isPressed;
+	private int keyID;
+	private int tileShift;
 	
 	public Engine(int width, int height)
 	{
 		this.width = width;
 		this.height = height;
-		player = new Player(0,0);
+		player = new Player(100,100);
 		real_x = player.getX();
 		real_y = player.getY();
 		start();
@@ -43,6 +46,16 @@ public class Engine implements Runnable
 		return shiftY;
 	}
 	
+	public void keyPressed(int keyID)
+	{
+		isPressed = true;
+		this.keyID = keyID;
+	}
+	
+	public void keyReleased()
+	{
+		isPressed = false;
+	}
 	
 	
 	public void start()
@@ -50,8 +63,12 @@ public class Engine implements Runnable
 	{
 		
 		isRun = true;	
-		new Thread(this).start();
-		
+		new Thread(this).start();	
+	}
+	
+	public int getTileShift()
+	{
+		return tileShift;
 	}
 	
 	public void formTiles()
@@ -62,10 +79,16 @@ public class Engine implements Runnable
 	//	System.out.println("i "+(player.getX()/64 - width/128) + " " + (player.getX()/64 + width/128));
 	//	System.out.println( "j "+(player.getY()/16 - height/32) + " " + (player.getY()/16 + height/32));
 		
-		for (int i = player.getX()/64 - width/128 ; i < player.getX()/64 + width/128 + 8; i++)
+		 tileShift = 0;
+		if ((player.getX()/64 - width/128 > 0) || (player.getY()/16 - height/32 > 0))
+		{
+			tileShift = 2;
+		}
+		
+		for (int i = player.getX()/64 - width/128 - tileShift; i < player.getX()/64 + width/128 + 2 ; i++)
 		{
 			
-			for (int j = player.getY()/16 - height/32; j < player.getY()/16 + height/32 + 5; j++)
+			for (int j = player.getY()/16 - height/32 - tileShift; j < player.getY()/16 + height/32 + 3; j++)
 			{
 				if ( i >= 0 && j >= 0
 						&& i < map.getTiles().length && j <  map.getTiles()[0].length)
@@ -104,18 +127,27 @@ public class Engine implements Runnable
 	
 	public void mousePressed(int move_to_x, int move_to_y)
 	{
-	
-		vector_x = move_to_x  - width/2;
-		vector_y = move_to_y  - height/2;
-		
-		distance = (int) Math.sqrt(Math.pow(vector_x, 2) + Math.pow(vector_y, 2));
-		if (distance < 3 )
+		if (isPressed)
 		{
-			distance = 0;
+			int[] cord = tileFounder(move_to_x + player.getX() - width/2, move_to_y + player.getY() - height/2);
+			map.getTiles()[cord[0]][cord[1]].setId(keyID);
+			
 		}
+		else
+		{
+			vector_x = move_to_x  - width/2;
+			vector_y = move_to_y  - height/2;
+		
+			distance = (int) Math.sqrt(Math.pow(vector_x, 2) + Math.pow(vector_y, 2));
+			if (distance < 3 )
+			{
+				distance = 0;
+			}
+		}
+		
 	}
 	
-	private void tileFounder(int x, int y)
+	private int[] tileFounder(int x, int y)
 	{
 		int x0, y0;
 		
@@ -205,7 +237,7 @@ public class Engine implements Runnable
 					case 4 : x0--; break;
 					case 5 : y0 = y0 + 2; break;
 					case 6 : x0++; break;
-					case 7 : y0 = y0 - 2; break;
+				//	case 7 : y0 = y0 - 2; break;
 				}
 				
 			//	System.out.println(index);
@@ -215,6 +247,10 @@ public class Engine implements Runnable
 		
 		GamePanel.console.addField("X :" + x0, 2);
 		GamePanel.console.addField("Y :" + y0, 3);
+		int[] r = new int[2];
+		r[0] = x0;
+		r[1] = y0;
+	return r;
 	}
 	
 	private double getDistance(int x, int y)
@@ -230,6 +266,16 @@ public class Engine implements Runnable
 	public boolean isPlayerMoving()
 	{
 		return player.isMoving();
+	}
+	
+	private boolean canMove(int x, int y)
+	{
+		int[] cord = tileFounder(x, y);
+		if (map.getTiles()[cord[0]][cord[1]].get_id() == 1)
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	public void move()
@@ -256,23 +302,39 @@ public class Engine implements Runnable
 			}
 			
 			
-			real_x = real_x + cos*speed;
-			real_y = real_y + sin*speed;
 			
-			player.setX((real_x + cos*speed));
-			player.setY((real_y + sin*speed));
+			
+			
+			if (canMove((int)(real_x + cos*speed),(int) (real_y + sin*speed)))
+			{
+				real_x = real_x + cos*speed;
+				real_y = real_y + sin*speed;
+	
+				player.setX((real_x + cos*speed));
+				player.setY((real_y + sin*speed));
+			}
+			else 
+			{
+				distance = 0;
+			}
 			distance = distance - speed;
 		}
 		else
 		{
 			player.setMoving(true);
-			real_x = real_x + cos*distance;
-			real_y = real_y + sin*distance;
-			
-			player.setX((real_x + cos*distance));
-			player.setY((real_y + sin*distance));
-			distance =  0;
-			player.setMoving(false);
+				if (canMove((int)(real_x + cos*distance),(int) (real_y + sin*distance)))
+				{
+					real_x = real_x + cos*distance;
+					real_y = real_y + sin*distance;
+				}
+				else 
+				{
+					distance = 0;
+				}
+				player.setX((real_x + cos*distance));
+				player.setY((real_y + sin*distance));
+				distance =  0;
+				player.setMoving(false);
 		}
 		
 		

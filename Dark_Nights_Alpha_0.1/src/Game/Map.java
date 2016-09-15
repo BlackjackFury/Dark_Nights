@@ -18,18 +18,20 @@ public class Map {
 			{
 			
 
-				tileMap[i][j] = new Tile(rand.nextInt(1));
+				tileMap[i][j] = new Tile(0);
 					
 			}
 		}
 		
 		for (int i = 0; i < tileMap.length; i ++)
 			
-			tileMap[i][0] = new Tile(2);
+			tileMap[i][0] = new Tile(1);
 		
-	for (int i = 0; i < tileMap[0].length; i ++)
+		for (int i = 0; i < tileMap[0].length; i ++)
 			
-			tileMap[0][i] = new Tile(2);
+			tileMap[0][i] = new Tile(1);
+		
+		
 		
 	}
 	
@@ -42,8 +44,5 @@ public class Map {
 	{
 		return objects;
 	}
-	
 
-	
-	
 }
